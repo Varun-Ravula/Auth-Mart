@@ -1,23 +1,17 @@
-.user-profile-navbar {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
+.dashboard-page {
+    display: grid;
+    gap: 16px;
 }
 
-.nav-link.active {
-    color: #E51A4C;
+.dashboard-header-card,
+.dashboard-tabs-card {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: 20px;
+    box-shadow: var(--app-shadow);
+    color: var(--app-text);
 }
 
-/* user details at the top */
-.user-info{
-display:flex;
-flex-direction:column;
-align-items: end;
-}
-
-/* styling for user profile picture */
-.user-profile-picture{
-    border-radius:50%;
-    box-shadow:4px 4px 12px black;
-    object-fit: cover;
+.dashboard-title {
+    color: var(--app-text) !important;
 }

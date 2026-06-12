@@ -1,28 +1,81 @@
-/* navigation font import */
-@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
-.navbar{
-display:flex;
-justify-content:center;
+.navigation-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 24px;
+    background: var(--app-nav-bg);
+    color: var(--app-text);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--app-border);
 }
 
-.nav-link{
-color:#045C94;
-margin:auto;
-font-family: "Josefin Sans", sans-serif;
-margin-top:10px;
-font-weight:600;
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
 }
 
-.nav-brand{
-    margin-top: 8px;
-}
-.nav-link.active{
-    color:#E51A4C;
+.brand-title {
+    display: block;
+    color: var(--app-text);
+    font-weight: 700;
+    font-size: 1rem;
 }
 
-.nav-icon{
-font-size:18px;
-margin-top:-8px;
-margin-right:5px;
+.brand-subtitle {
+    display: block;
+    color: var(--app-text-soft);
+    font-size: 0.8rem;
+}
+
+.nav-actions {
+    justify-content: flex-end;
+}
+
+.nav-profile-button {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+}
+
+.profile-popover-content {
+    min-width: 240px;
+}
+
+.profile-name,
+.profile-email,
+.profile-label,
+.profile-value {
+    display: block;
+    color: var(--app-text);
+}
+
+.profile-email,
+.profile-label {
+    color: var(--app-text-soft);
+}
+
+.profile-popover-divider {
+    margin: 12px 0;
+}
+
+.theme-switch-wrap {
+    color: var(--app-text);
+}
+
+.theme-icon {
+    color: var(--app-text-soft);
+}
+
+@media screen and (max-width: 768px) {
+    .navigation-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }

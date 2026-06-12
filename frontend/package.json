@@ -1,15 +1,17 @@
 {
-  "name": "vite-project",
+  "name": "auth-mart",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "latest",
+    "antd": "latest",
     "axios": "^1.8.4",
     "bootstrap": "^5.3.3",
     "react": "^19.0.0",

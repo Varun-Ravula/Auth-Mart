@@ -1,143 +1,190 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { FaUserPlus } from "react-icons/fa";
+import { FaUserPlus, FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { LoginContext } from '../../ContextApis/LoginContext';
+import { Button, Alert, Card, Typography } from 'antd';
 
-// impooerting styling file
 import './Register.css';
+import { ImSpinner9 } from 'react-icons/im';
 
-// impoerting react icon
-import { ImSpinner9 } from "react-icons/im";
+const EMPTY_INITIAL_VALUES = {};
 
-function Register() {
-
-  // use form 
-  const { register, reset, handleSubmit, formState: { errors } } = useForm();
-
-  // use navigate
+function Register({
+  mode = 'register',
+  initialValues,
+  onCancel,
+  onSubmitSuccess,
+  submitLabel
+}) {
+  const isEditMode = mode === 'edit';
+  const profileValues = initialValues || EMPTY_INITIAL_VALUES;
+  const { register: registerField, reset, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
-
-  // using states of context
-  const [user, loginUser, errorInLogin] = useContext(LoginContext);
-  // error state
-  const [errorDisplayState, setErrorDisplayState] = useState("");
-
-  // register succefully message state
-  const [registerMessage, setRegisterMessage] = useState("");
-
-  // profile picture state
+  const [user, errorInLogin, userLoginStatus, setUserLoginStatus, loginUser, setUser] = useContext(LoginContext);
+  const [errorDisplayState, setErrorDisplayState] = useState('');
+  const [registerMessage, setRegisterMessage] = useState('');
   const [selectedProfile, setSelectedProfile] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  // state for is submitting -> preventing the multiple submissions of images in to cloud
-  // if the isSubmitting button state is false it shows the submitting and whenever it is true then it will be shown as enabled button 
-  const [isSubmitting,setIsSubmitting]=useState(false);
+  const register_url_env = import.meta.env.VITE_REGISTER_URL;
+  const update_url_env = import.meta.env.VITE_UPDATE_USER_URL || 'http://localhost:5000/user-api/update-user';
 
+  useEffect(() => {
+    reset({
+      userName: profileValues.userName || '',
+      password: '',
+      email: profileValues.email || '',
+      mobile: profileValues.mobile || '',
+      dob: profileValues.dob ? String(profileValues.dob).slice(0, 10) : ''
+    });
+    setSelectedProfile(null);
+    setErrorDisplayState('');
+    setRegisterMessage('');
+  }, [profileValues.userName, profileValues.email, profileValues.mobile, profileValues.dob, reset, isEditMode]);
 
-  // function to handling the submitted data
   const submitForm = (newUser) => {
-  // accessing register url from env file
-  const register_url_env=import.meta.env.VITE_REGISTER_URL;
+    const apiUrl = isEditMode
+      ? `${update_url_env}/${encodeURIComponent(profileValues.email || newUser.email)}`
+      : register_url_env;
+    const method = isEditMode ? 'put' : 'post';
 
     setIsSubmitting(true);
-    // creating an instance of form data and including the multi part data
     const fd = new FormData();
-    // appending the user string with user details and converting them into javascript object->json object 
-    fd.append("user", JSON.stringify(newUser));
-    // appending the profile name with details of user selected file
-    fd.append("profile", selectedProfile);
-    // sending the form data instead of individual new user details
-    axios.post(register_url_env, fd)
+    const payload = { ...newUser };
+    delete payload.profilePicture;
+
+    if (isEditMode && !payload.password) {
+      delete payload.password;
+    }
+
+    fd.append('user', JSON.stringify(payload));
+    if (selectedProfile) {
+      fd.append('profile', selectedProfile);
+    }
+
+    const requestConfig = isEditMode
+      ? { headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` } }
+      : undefined;
+
+    axios[method](apiUrl, fd, requestConfig)
       .then(response => {
-        if (response.status == 201) {
+        if (!isEditMode && response.status === 201) {
           setRegisterMessage(response.data.message);
           reset();
           navigate('/login');
-        } else if (response.status !== 201) {
+        } else if (isEditMode && response.status === 200) {
+          setRegisterMessage(response.data.message || 'profile updated successfully');
+          const updatedUser = response.data.payload;
+          if (updatedUser) {
+            setUser(updatedUser);
+            sessionStorage.setItem('user', JSON.stringify(updatedUser));
+          }
+          onSubmitSuccess?.(response.data);
+        } else {
           setErrorDisplayState(response.data.message);
         }
       })
       .catch(error => {
-        // if any url mistakes happen then it will be triggered
         if (error.response) {
+          setErrorDisplayState(error.response.data?.message || error.message);
+        } else if (error.request) {
+          setErrorDisplayState('Sorry, there was an connection error, check you connection!');
+        } else {
           setErrorDisplayState(error.message);
         }
-        // if any coonection error ocuur then it will be triggered
-        else if (error.request) {
-          setErrorDisplayState("Sorry, there was an connection error, check you connection!")
-        }
-        // other errors handling
-        else {
-          setErrorDisplayState(error.message);
-        }
-      }).finally(()=>{
+      }).finally(() => {
         setIsSubmitting(false);
-      })
-  }
+      });
+  };
 
-  // onInput will be fired before submission by this we can extract the image and its details for submitting 
   const selectedFile = (event) => {
     setSelectedProfile(event.target.files[0]);
-  }
+  };
+
+  const buttonText = submitLabel || (isEditMode ? 'Update profile' : 'Register');
+  const headingText = isEditMode ? 'Update Profile' : 'Register Here';
+
   return (
     <div>
-      {errorDisplayState ? <p className="text-danger text-center display-5 mt-5">{errorDisplayState}</p> :
+      {errorDisplayState ? <Alert type="error" showIcon className="mb-3" message={errorDisplayState} /> :
         <div>
-          {registerMessage ? <p className="text-success text-center display-6 text-capitalized">{registerMessage}</p> : <h4 className="display-6 text-success text-center register-here-text">Register Here.</h4>}
-          <div className='m-auto row col-sm-9 col-md-8 col-lg-6 mt-3'>
-            <form onSubmit={handleSubmit(submitForm)}>
-              {/* user name */}
-              <div className="form-floating">
-                <input type="text" className='form-control mb-3' {...register('userName', { required: true, minLength: 3, maxLength: 15 })} placeholder='User Name'></input>
-                <label htmlFor='userName'>user name</label>
-                {errors.userName?.type == "required" && <p className="text-danger">*user name is required.</p>}
-                {errors.userName?.type == "minLength" && <p className="text-danger">*min 3 characters is required.</p>}
-                {errors.userName?.type == "maxLength" && <p className="text-danger">*max 15 characters is required.</p>}
+          {registerMessage ? <Alert type="success" showIcon className="mb-3" message={registerMessage} /> : <Typography.Title level={3} className="display-6 text-center register-here-text">{headingText}</Typography.Title>}
+          <Card className='m-auto row col-sm-9 col-md-8 col-lg-6 mt-3 register-card' bordered={false}>
+            <form className="auth-form" onSubmit={handleSubmit(submitForm)}>
+              <div className="mb-3">
+                <input type="text" className='form-control auth-input' {...registerField('userName', { required: true, minLength: 3, maxLength: 15 })} placeholder='User Name' />
+                {errors.userName?.type === 'required' && <p className="text-danger">*user name is required.</p>}
+                {errors.userName?.type === 'minLength' && <p className="text-danger">*min 3 characters is required.</p>}
+                {errors.userName?.type === 'maxLength' && <p className="text-danger">*max 15 characters is required.</p>}
               </div>
-              {/* pasword */}
-              <div className="form-floating">
-                <input type="password" className='form-control mb-3' {...register('password', { required: true, minLength: 3, maxLength: 15 })} placeholder='Password'></input>
-                <label htmlFor='Password text-secondary'>password</label>
-                {errors.password?.type == "required" && <p className='text-danger'>*password is required.</p>}
-                {errors.password?.type == "minLength" && <p className='text-danger'>*min 3 characters is required.</p>}
-                {errors.password?.type == "maxLength" && <p className='text-danger'>*max 15 characters is required.</p>}
+              <div className="mb-3">
+                <div className="password-wrapper" style={{ position: 'relative' }}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    className='form-control auth-input'
+                    style={{ paddingRight: '40px' }}
+                    {...registerField('password', isEditMode ? { minLength: 3, maxLength: 15 } : { required: true, minLength: 3, maxLength: 15 })}
+                    placeholder={isEditMode ? 'New password (optional)' : 'Password'}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: 'var(--app-text-soft, #8c8c8c)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '4px',
+                      zIndex: 2
+                    }}
+                  >
+                    {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                  </button>
+                </div>
+                {!isEditMode && errors.password?.type === 'required' && <p className='text-danger'>*password is required.</p>}
+                {errors.password?.type === 'minLength' && <p className='text-danger'>*min 3 characters is required.</p>}
+                {errors.password?.type === 'maxLength' && <p className='text-danger'>*max 15 characters is required.</p>}
               </div>
-              {/* email */}
-              <div className="form-floating">
-                <input type="email" className='form-control mb-3' {...register('email', { required: true })} placeholder='example@gmail.com'></input>
-                <label htmlFor='email'>email</label>
-                {errors.email?.type == "required" && <p className="text-danger">*email is required</p>}
+              <div className="mb-3">
+                <input type="email" className='form-control auth-input' {...registerField('email', { required: true })} placeholder='example@gmail.com' />
+                {errors.email?.type === 'required' && <p className="text-danger">*email is required</p>}
               </div>
-              {/* mobile number */}
-              <div className="form-floating">
-                <input type="number" className='form-control mb-3' {...register('mobile', { required: true })} placeholder='Mobile Number'></input>
-                <label htmlFor='Mobile'>mobile number</label>
-                {errors.mobile?.type == "required" && <p className='text-danger'>*mobile number is required.</p>}
+              <div className="mb-3">
+                <input type="number" className='form-control auth-input' {...registerField('mobile', { required: true })} placeholder='Mobile Number' />
+                {errors.mobile?.type === 'required' && <p className='text-danger'>*mobile number is required.</p>}
               </div>
-              {/* date of birth */}
-              <div className="form-floating">
-                <input type="date" className='form-control mb-3' {...register('dob', { required: true })} placeholder='DOB'></input>
-                <label htmlFor='dob'>date of birth</label>
-                {errors.dob?.type == "required" && <p className='text-danger'>*date of birth is required.</p>}
+              <div className="mb-3">
+                <input type="date" className='form-control auth-input' {...registerField('dob', { required: true })} placeholder='DOB' />
+                {errors.dob?.type === 'required' && <p className='text-danger'>*date of birth is required.</p>}
               </div>
-
-              {/* user profile picture */}
-              <div className="form-floating">
-                <input type="file" className="form-control" onInput={selectedFile} {...register('profilePicture', { required: true })} />
-                <label htmlFor="profilePicture">Select Profile Picture</label>
-                {errors.profilePicture?.type == 'required' && <p className="text-danger">*File is required.</p>}
+              <div className="mb-3">
+                <input type="file" className="form-control auth-input" onInput={selectedFile} {...registerField('profilePicture', isEditMode ? {} : { required: true })} />
+                {!isEditMode && errors.profilePicture?.type === 'required' && <p className="text-danger">*File is required.</p>}
+                {isEditMode && <p className="text-secondary">Leave blank to keep the current profile picture.</p>}
               </div>
-              {/* register button */}
-              <button type="submit" disabled={isSubmitting} className="btn btn-success mt-2">{isSubmitting ? <span >Registering <ImSpinner9 className="spin" /></span>:<><FaUserPlus /> Register</>}</button>
-
+              <Button type="primary" htmlType="submit" disabled={isSubmitting} className="mt-2">
+                {isSubmitting ? <span>{isEditMode ? 'Updating' : 'Registering'} <ImSpinner9 className="spin" /></span> : <><FaUserPlus /> {buttonText}</>}
+              </Button>
+              {isEditMode && onCancel && (
+                <Button className="mt-2 ms-2" onClick={onCancel}>Cancel</Button>
+              )}
             </form>
-          </div>
+          </Card>
         </div>
       }
     </div>
-  )
+  );
 }
 
 export default Register;

@@ -1,0 +1,70 @@
+.about-page {
+	padding: 16px 0 40px;
+}
+
+.about-heading {
+	text-align: center;
+	color: var(--app-text) !important;
+	margin-bottom: 24px !important;
+}
+
+.about-card {
+	background: var(--app-surface);
+	border: 1px solid var(--app-border);
+	box-shadow: var(--app-shadow);
+	border-radius: 20px;
+	color: var(--app-text);
+}
+
+.about-image {
+	width: 100%;
+	height: 280px;
+	border-radius: 16px;
+	object-fit: cover;
+	margin-bottom: 16px;
+}
+
+.about-tags {
+	margin-bottom: 12px;
+}
+
+.about-copy {
+	color: var(--app-text-soft);
+	margin-bottom: 0;
+}
+
+.about-collapse {
+	margin-top: 18px;
+	background: transparent;
+}
+
+.about-points-row {
+	margin-top: 18px;
+}
+
+.about-point-card {
+	background: var(--app-surface-strong);
+	border: 1px solid var(--app-border);
+	border-radius: 18px;
+	box-shadow: var(--app-shadow);
+	height: 100%;
+	text-align: left;
+}
+
+.about-point-icon {
+	font-size: 1.1rem;
+	color: #22c55e;
+	margin-bottom: 8px;
+}
+
+.about-point-title,
+.about-point-copy {
+	color: var(--app-text) !important;
+	margin-bottom: 0;
+}
+
+@media screen and (max-width: 768px) {
+	.about-image {
+		height: 220px;
+	}
+}

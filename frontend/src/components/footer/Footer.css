@@ -1,13 +1,16 @@
-/* importing the font from google */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
-
 .footerContent {
-    min-height: 18vh;
-    background-color: #b2bdb5;
-    color: #000501;
-    font-family: "Roboto", sans-serif;
-    font-weight:600;
-    display:flex;
+    min-height: 12vh;
+    background: var(--app-footer-bg);
+    color: var(--app-text);
+    border-radius: 20px 20px 0 0;
+    display: flex;
     justify-content: center;
     align-items: center;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.footer-title,
+.footer-text {
+    color: var(--app-text) !important;
+    margin-bottom: 0;
 }

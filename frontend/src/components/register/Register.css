@@ -1,8 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=Coral+Pixels&display=swap');
 
+.register-card {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: 20px;
+    box-shadow: var(--app-shadow);
+    color: var(--app-text);
+}
+
+.auth-form .form-control {
+    background-color: var(--app-surface-strong);
+    color: var(--app-text);
+    border-color: var(--app-border);
+}
+
+.auth-form .auth-input {
+    min-height: 48px;
+}
+
+.auth-form .form-control::placeholder {
+    color: var(--app-text-soft);
+    opacity: 1;
+}
+
+.auth-form .form-control:focus {
+    background-color: var(--app-surface-strong);
+    color: var(--app-text);
+    border-color: var(--app-text-soft);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.15);
+}
+
 .register-here-text{
-    font-family: "Coral Pixels", serif;
+    font-family: cursive;
     font-weight:400;    
+    color: var(--app-text);
 }
 
 /* adding spinner */

@@ -1,28 +1,37 @@
 // importing modules
-import React,{ useContext } from 'react'
-import {Outlet} from 'react-router-dom';
+import React,{ useContext } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { LoginContext } from '../../ContextApis/LoginContext';
-import { NavLink } from 'react-router-dom';
-import "./UserProfile.css"
+import "./UserProfile.css";
+import { Avatar, Card, Space, Tabs, Typography } from 'antd';
 
 function UserProfile() {
   // destructuring the states from context api
   const [user,errorInLogin,userLoginStatus,setUserLoginStatus,loginUser]=useContext(LoginContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const dashboardBase = '/dashboard';
+  const activeTab = location.pathname.endsWith('/cart') ? 'cart' : 'products';
+
+  const dashboardTabs = [
+    { key: 'products', label: 'Products' },
+    { key: 'cart', label: 'Cart' }
+  ];
 
   return (
-    <div>
-      <div className="user-info">
-        <img src={user.image} alt={user.userName} height="75px" width="75px" className="user-profile-picture"></img>
-        <p className="mt-3">Welcome <b className="text-capitalize">{user.userName}</b></p>
-        <p className=' text-secondary'>{user.email}</p>
-      </div>
-      <div className="user-profile-content">
-        <h4 className="text-center mt-3 mb-3">Available categories:</h4>
-        <ul className="navbar-nav user-profile-navbar">
-          <li className="nav-item user-profile-nav-item"><NavLink className="nav-link btn btn-warning p-2" to="/user-profile">Products</NavLink></li>
-          <li className="nav-item user-profile-nav-item"><NavLink className="nav-link btn btn-warning p-2" to="Cart">Cart</NavLink></li>
-        </ul>
-      </div>
+    <div className="dashboard-page">
+          <div>
+            <Typography.Title level={2} style={{ marginBottom: 0, textAlign: "center" }}>Welcome {user.userName || 'User'}</Typography.Title>
+          </div>
+      <Card className="dashboard-tabs-card" bordered={false}>
+        <Typography.Title level={5} className="dashboard-title">Available categories</Typography.Title>
+        <Tabs
+          activeKey={activeTab}
+          items={dashboardTabs}
+          onChange={(key) => navigate(`${dashboardBase}/${key}`)}
+        />
+      </Card>
       <Outlet/>
     </div>
   )
