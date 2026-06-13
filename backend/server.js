@@ -55,21 +55,21 @@ const mongoClient = require('mongodb').MongoClient;
 // connecting to database
 const mongoUrl = process.env.MONGO_DB_URL;
 mongoClient.connect(mongoUrl)
-.then(dbref => {
-    const db = dbref.db('usersdb');
-    const usersCollection = db.collection('usersCollection');
-    const productsCollection = db.collection('productsCollection');
-    app.set('usersCollection', usersCollection);
-    app.set('productsCollection', productsCollection);
+    .then(dbref => {
+        const db = dbref.db('authMartDb');
+        const usersCollection = db.collection('usersCollection');
+        const productsCollection = db.collection('productsCollection');
+        app.set('usersCollection', usersCollection);
+        app.set('productsCollection', productsCollection);
 
-    const port = process.env.PORT || 5000;
-    app.listen(port, () => {
-        console.log(`server is listening on ${port} port number`);
+        const port = process.env.PORT || 5000;
+        app.listen(port, () => {
+            console.log(`server is listening on ${port} port number`);
+        });
+
+        console.log('database connected succesfully');
+    })
+    .catch(error => {
+        console.log('error occured in database connection', error);
+        process.exit(1);
     });
-
-    console.log('database connected succesfully');
-})
-.catch(error => {
-    console.log('error occured in database connection', error);
-    process.exit(1);
-});
